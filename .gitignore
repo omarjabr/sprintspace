@@ -5,3 +5,10 @@
 tags
 node_modules
 __pycache__
+
+frontend/dev-dist
+frontend/yarn.lock
+sprintspace/public/frontend
+sprintspace/www/sprintspace.html
+*.env
+.vscode
