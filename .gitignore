@@ -6,6 +6,8 @@ tags
 node_modules
 __pycache__
 
+*.lock
+
 frontend/dev-dist
 frontend/yarn.lock
 sprintspace/public/frontend
