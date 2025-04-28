@@ -135,7 +135,7 @@ def get_task_data(project: str, page: int = 1, page_size: int = 9999) -> List[Di
 
 @frappe.whitelist()
 # @redis_cache(ttl=300)  # Cache for 5 minutes
-def get_tasks(project: str, page: int = 1, page_size: int = 50) -> Dict[str, Any]:
+def get_tasks(project: str, page: int = 1, page_size: int = 9999) -> Dict[str, Any]:
     """
     Get tasks for a project with pagination and caching
     Args:
