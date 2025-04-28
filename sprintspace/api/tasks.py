@@ -15,7 +15,7 @@ KANBAN_LIST = [
 ]
 
 
-def get_task_data(project: str, page: int = 1, page_size: int = 50) -> List[Dict[Any, Any]]:
+def get_task_data(project: str, page: int = 1, page_size: int = 9999) -> List[Dict[Any, Any]]:
     """Get tasks with related data in optimized queries"""
     try:
         # Calculate pagination
