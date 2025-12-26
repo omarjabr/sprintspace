@@ -1,6 +1,6 @@
 import { Task } from "@/types";
 import { DragDropContext } from "@hello-pangea/dnd";
-import { useFrappePutCall } from "frappe-react-sdk";
+import { useFrappePostCall } from "frappe-react-sdk";
 import { useEffect, useState } from "react";
 import ListItem from "./list-item";
 
@@ -11,6 +11,7 @@ interface ListContainerProps {
     cards: Task[];
   }[];
   mutate: () => void;
+  project: string;
 }
 
 function reorder<T>(list: T[], startIndex: number, endIndex: number) {
@@ -20,7 +21,7 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number) {
   return result;
 }
 
-function ListContainer({ data, mutate }: ListContainerProps) {
+function ListContainer({ data, mutate, project }: ListContainerProps) {
   const [orderedData, setOrderedData] = useState<
     {
       id: string;
@@ -30,16 +31,18 @@ function ListContainer({ data, mutate }: ListContainerProps) {
   >(data);
 
   const {
-    call: updateCardOrder,
+    call: moveCard,
     error,
     loading,
-  } = useFrappePutCall("sprintspace.api.tasks.update_card_order");
+  } = useFrappePostCall("sprintspace.api.tasks.move_card");
 
   useEffect(() => {
     const sortedData = data.map((list) => ({
       ...list,
       cards: [...list.cards].sort(
-        (a, b) => (a.custom_kanban_index || 0) - (b.custom_kanban_index || 0)
+        (a, b) =>
+          (a.custom_kanban_rank ?? a.custom_kanban_index ?? 0) -
+          (b.custom_kanban_rank ?? b.custom_kanban_index ?? 0)
       ),
     }));
     setOrderedData(sortedData);
@@ -55,8 +58,7 @@ function ListContainer({ data, mutate }: ListContainerProps) {
       return;
     }
 
-    let newOrderedData = [...orderedData];
-    const updates: any[] = [];
+    const newOrderedData = [...orderedData];
 
     const sourceList = newOrderedData.find(
       (list) => list.id === source.droppableId
@@ -74,43 +76,26 @@ function ListContainer({ data, mutate }: ListContainerProps) {
           source.index,
           destination.index
         );
-
-        reorderedCards.forEach((card, index) => {
-          updates.push({
-            name: card.name,
-            custom_kanban_index: index,
-          });
-        });
-
         sourceList.cards = reorderedCards;
       } else {
         const [movedCard] = sourceList.cards.splice(source.index, 1);
         destList.cards.splice(destination.index, 0, movedCard);
-
-        updates.push({
-          name: movedCard.name,
-          status: destination.droppableId,
-          custom_kanban_index: destination.index,
-        });
-
-        sourceList.cards.forEach((card, index) => {
-          updates.push({
-            name: card.name,
-            custom_kanban_index: index,
-          });
-        });
-
-        destList.cards.forEach((card, index) => {
-          if (card.name !== movedCard.name) {
-            updates.push({
-              name: card.name,
-              custom_kanban_index: index,
-            });
-          }
-        });
       }
 
-      await updateCardOrder({ tasks: updates });
+      // Compute destination neighbors after the optimistic move.
+      const destCards = destList.cards;
+      const before = destination.index > 0 ? destCards[destination.index - 1]?.name : null;
+      const after =
+        destination.index < destCards.length - 1 ? destCards[destination.index + 1]?.name : null;
+
+      await moveCard({
+        name: draggableId,
+        project,
+        from_status: source.droppableId,
+        to_status: destination.droppableId,
+        before,
+        after,
+      });
 
       setOrderedData(newOrderedData);
       mutate();

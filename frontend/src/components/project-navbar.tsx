@@ -1,15 +1,18 @@
 import { getInitials } from "@/lib/utils";
 import { Project } from "@/types";
-import { CalendarDays, Ellipsis, ListFilter, Star } from "lucide-react";
+import { CalendarDays, Ellipsis, Plus, Star } from "lucide-react";
+import FilterDialog, { TaskFilters } from "./filter-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 
 interface ProjectNavbarProps {
   project: Project;
+  onFilterChange: (filters: TaskFilters) => void;
+  currentFilters: TaskFilters;
 }
 
-const ProjectNavbar = ({ project }: ProjectNavbarProps) => {
+const ProjectNavbar = ({ project, onFilterChange, currentFilters }: ProjectNavbarProps) => {
   return (
     <div className="h-auto z-0 bg-black/20 backdrop-filter backdrop-blur-sm pb-0 relative">
       <div className="inline-flex relative flex-row flex-1 flex-wrap items-center w-full h-auto px-4 py-3 gap-x-4 text-white">
@@ -27,18 +30,16 @@ const ProjectNavbar = ({ project }: ProjectNavbarProps) => {
           <Button variant="nav" size="icon" className="p-[6px]">
             <CalendarDays size={20} />
           </Button>
-          <Button variant="nav" className="">
-            <ListFilter size={14} />
-            Filter
-          </Button>
+          <FilterDialog onFilterChange={onFilterChange} currentFilters={currentFilters} />
           <Separator
             orientation="vertical"
             className="mr-2 h-4 bg-[#ffffff29]"
           />
 
-          <div className="flex relative flex-row justify-center top-[2px] align-baseline max-h-[32px] mr-1 pl-[2px] overflow-visible">
+          <div className="flex relative flex-row justify-center top-[2px] align-baseline max-h-[32px] mr-1 pl-[2px] overflow-visible gap-x-2">
             {project.users.map((user) => (
               <Avatar
+                key={user.email}
                 className="w-7 h-7 text-xs font-bold"
                 title={`${user.full_name} (${user.email})`}
               >
@@ -52,6 +53,15 @@ const ProjectNavbar = ({ project }: ProjectNavbarProps) => {
                 </AvatarFallback>
               </Avatar>
             ))}
+            {
+              project.users.length === 0 && (
+                <Avatar className="w-7 h-7 text-xs font-bold">
+                  <AvatarFallback className="bg-blue-200 text-blue-800">
+                    <Plus size={16} />
+                  </AvatarFallback>
+                </Avatar>
+              )
+            }
           </div>
           <Button variant="nav" size="icon" className="p-[6px]">
             <Ellipsis size={20} />

@@ -1,0 +1,26 @@
+{
+  "doctype": "DocType",
+  "name": "SprintSpace Checklist Item",
+  "module": "SprintSpace",
+  "autoname": "hash",
+  "custom": 0,
+  "istable": 1,
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "fields": [
+    {
+      "fieldname": "title",
+      "fieldtype": "Data",
+      "label": "Title",
+      "reqd": 1
+    },
+    {
+      "fieldname": "checked",
+      "fieldtype": "Check",
+      "label": "Checked"
+    }
+  ]
+}
+
+
+

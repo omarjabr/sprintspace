@@ -1,12 +1,12 @@
 import { getInitials } from "@/lib/utils";
 import { Task, TaskUser } from "@/types";
 import {
-  useFrappeGetDocList,
   useFrappePostCall,
+  useFrappeGetCall,
   useFrappeUpdateDoc,
 } from "frappe-react-sdk";
 import { Check, Eye } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import AssignPopover from "./assign-popover";
@@ -30,9 +30,14 @@ const ModalStatusBar = ({ data, mutate }: ModalStatusBarProps) => {
   const [type, setType] = useState(data.type);
   const [dueDate, setDueDate] = useState(data.exp_end_date);
 
-  const { data: usersList } = useFrappeGetDocList<TaskUser>("User", {
-    fields: ["name", "full_name", "email", "user_image"],
-  });
+  const { data: membersResp } = useFrappeGetCall<{
+    message: { ok: boolean; data?: TaskUser[]; error?: { code: string; message: string } };
+  }>("sprintspace.api.tasks.get_project_members", { project: data.project });
+
+  // Memoize usersList to prevent new reference on every render
+  const usersList = useMemo(() => {
+    return membersResp?.message?.ok ? membersResp.message.data || [] : [];
+  }, [membersResp]);
 
   const { call: assignUser } = useFrappePostCall(
     "frappe.desk.form.assign_to.add"
