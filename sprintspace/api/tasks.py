@@ -21,27 +21,38 @@ def get_task_data(project: str, page: int = 1, page_size: int = 9999, filters: D
         start = (page - 1) * page_size
 
         # Prepare filters
-        task_filters = {"project": project}
-        
+        task_filters = {}
+        if project != "My Tasks":
+            task_filters["project"] = project
+
+        # if project == "My Tasks":
+        #     task_filters["_assign"] = frappe.session.user
+
         # Apply additional filters if provided
         if filters:
             if filters.get("status") and len(filters["status"]) > 0:
                 task_filters["status"] = ["in", filters["status"]]
-                
+
             if filters.get("priority") and len(filters["priority"]) > 0:
                 task_filters["priority"] = ["in", filters["priority"]]
-                
+
             if filters.get("type") and len(filters["type"]) > 0:
                 task_filters["type"] = ["in", filters["type"]]
-                
+
+            if filters.get("assignedTo") and len(filters["assignedTo"]) > 0:
+                task_filters["_assign"] = [
+                    "like", f"%{filters['assignedTo'][0]}%"]
+
             if filters.get("dateRange"):
                 date_range = filters["dateRange"]
                 if date_range.get("start"):
-                    task_filters["exp_start_date"] = [">=", date_range["start"]]
+                    task_filters["exp_start_date"] = [
+                        ">=", date_range["start"]]
                 if date_range.get("end"):
                     task_filters["exp_end_date"] = ["<=", date_range["end"]]
 
         # Get tasks with main data
+        print(task_filters)
         tasks = frappe.get_all(
             "Task",
             filters=task_filters,
@@ -167,15 +178,15 @@ def get_tasks(project: str, page: int = 1, page_size: int = 9999, filters: str =
         if not project:
             frappe.throw(_("Project is required"))
 
-        if not frappe.has_permission("Project", "read", project):
-            frappe.throw(_("Not permitted to view tasks"))
+        # if not frappe.has_permission("Project", "read", project):
+        #     frappe.throw(_("Not permitted to view tasks"))
 
         # Validate pagination parameters
         page = cint(page)
         page_size = cint(page_size)
         if page < 1 or page_size < 1:
             frappe.throw(_("Invalid pagination parameters"))
-            
+
         # Parse filters if provided
         filter_dict = {}
         if filters:
@@ -203,24 +214,33 @@ def get_tasks(project: str, page: int = 1, page_size: int = 9999, filters: str =
         ]
 
         # Get total count for pagination
-        task_filters = {"project": project}
+        task_filters = {}
+        if project == "My Tasks":
+            task_filters["_assign"] = frappe.session.user
+        else:
+            task_filters["project"] = project
+
         if filter_dict:
             if filter_dict.get("status") and len(filter_dict["status"]) > 0:
                 task_filters["status"] = ["in", filter_dict["status"]]
-                
+
             if filter_dict.get("priority") and len(filter_dict["priority"]) > 0:
                 task_filters["priority"] = ["in", filter_dict["priority"]]
-                
+
             if filter_dict.get("type") and len(filter_dict["type"]) > 0:
                 task_filters["type"] = ["in", filter_dict["type"]]
-                
+
+            if filter_dict.get("assignedTo") and len(filter_dict["assignedTo"]) > 0:
+                task_filters["_assign"] = ["in", filter_dict["assignedTo"]]
+
             if filter_dict.get("dateRange"):
                 date_range = filter_dict["dateRange"]
                 if date_range.get("start"):
-                    task_filters["exp_start_date"] = [">=", date_range["start"]]
+                    task_filters["exp_start_date"] = [
+                        ">=", date_range["start"]]
                 if date_range.get("end"):
                     task_filters["exp_end_date"] = ["<=", date_range["end"]]
-                    
+
         total_tasks = frappe.db.count("Task", task_filters)
 
         return kanban_data
@@ -233,6 +253,7 @@ def get_tasks(project: str, page: int = 1, page_size: int = 9999, filters: str =
             "timestamp": frappe.utils.now_datetime()
         }
 
+
 @frappe.whitelist()
 def add_card(subject, status, project):
     """
@@ -243,6 +264,29 @@ def add_card(subject, status, project):
         project (str): Task project
     """
     try:
+        # Validate subject
+        if not subject or not subject.strip():
+            frappe.throw(_("Task subject is required"), frappe.ValidationError)
+
+        # Validate status
+        valid_statuses = ["Open", "Working",
+                          "Pending Review", "Overdue", "Completed"]
+        if status not in valid_statuses:
+            frappe.throw(_("Invalid status. Must be one of: {0}").format(
+                ", ".join(valid_statuses)), frappe.ValidationError)
+
+        # Validate project exists
+        if not frappe.db.exists("Project", project):
+            frappe.throw(_("Project not found"), frappe.ValidationError)
+
+        # Check permissions
+        if not frappe.has_permission("Project", "write", project):
+            frappe.throw(
+                _("No permission to add tasks to this project"), frappe.PermissionError)
+
+        # Sanitize input
+        subject = frappe.utils.strip_html_tags(subject).strip()
+
         custom_kanban_index = frappe.db.get_value(
             "Task", {"status": status}, "max(custom_kanban_index)") or 0
         task = frappe.get_doc({
@@ -276,7 +320,30 @@ def update_card_order(tasks):
     """
     try:
         tasks = frappe.parse_json(tasks)
+
+        # Validate input
+        if not tasks or not isinstance(tasks, list):
+            frappe.throw(_("Invalid tasks data"), frappe.ValidationError)
+
+        valid_statuses = ["Open", "Working",
+                          "Pending Review", "Overdue", "Completed"]
+
         for task_update in tasks:
+            # Validate task exists
+            if not frappe.db.exists("Task", task_update.get("name")):
+                frappe.throw(_("Task {0} not found").format(
+                    task_update.get("name")), frappe.ValidationError)
+
+            # Check permissions
+            if not frappe.has_permission("Task", "write", task_update.get("name")):
+                frappe.throw(_("No permission to update task {0}").format(
+                    task_update.get("name")), frappe.PermissionError)
+
+            # Validate status if provided
+            if "status" in task_update and task_update["status"] not in valid_statuses:
+                frappe.throw(_("Invalid status: {0}").format(
+                    task_update["status"]), frappe.ValidationError)
+
             task = frappe.get_doc("Task", task_update["name"])
             if "status" in task_update:
                 task.status = task_update["status"]

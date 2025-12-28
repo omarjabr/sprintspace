@@ -6,21 +6,19 @@ import ProjectNavbar from "@/components/project-navbar";
 import { CardSkeleton } from "@/components/skeletons/card-skeleton";
 import { toast } from "@/components/ui/toast";
 import { Project, Task } from "@/types";
+import { UserContext } from "@/utils/auth/UserProvider";
 import { useFrappeGetDoc, useFrappePostCall } from "frappe-react-sdk";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 
 type ViewMode = "kanban" | "calendar" | "list";
 
-const ProjectKanban = () => {
-  const { id } = useParams();
+const MyTasks = () => {
+  const { currentUser } = React.useContext(UserContext);
   const [viewMode, setViewMode] = useState<ViewMode>("kanban");
-
-  if (!id) return null;
 
   const [filters, setFilters] = useState<TaskFilters>(() => {
     // Load filters from localStorage on initial mount
-    const savedFilters = localStorage.getItem(`sprintspace-filters-${id}`);
+    const savedFilters = localStorage.getItem(`sprintspace-filters-my-tasks`);
     if (savedFilters) {
       try {
         return JSON.parse(savedFilters);
@@ -43,8 +41,12 @@ const ProjectKanban = () => {
     };
   });
 
-  const { data: project, isLoading: isProjectLoading } =
-    useFrappeGetDoc<Project>("Project", id);
+  // Get user details
+  const { data: user } = useFrappeGetDoc<{
+    full_name: string;
+    email: string;
+    user_image: string;
+  }>("User", currentUser);
 
   // Use POST call for dynamic queries with filters
   const { call: getTasks, loading: isTasksLoading } = useFrappePostCall<{
@@ -63,15 +65,21 @@ const ProjectKanban = () => {
     }[];
   } | null>(null);
 
-  // Fetch tasks whenever filters or project id changes
+  // Fetch tasks whenever filters change - only for current user
   useEffect(() => {
-    if (!id) return;
+    if (!currentUser) return;
 
     const fetchTasks = async () => {
       try {
+        // Add current user to filters to only fetch their tasks
+        const userFilters = {
+          ...filters,
+          assignedTo: [currentUser],
+        };
+
         const response = await getTasks({
-          project: id,
-          filters: JSON.stringify(filters),
+          project: "My Tasks",
+          filters: JSON.stringify(userFilters),
         });
         setBoard(response);
       } catch (error) {
@@ -81,23 +89,29 @@ const ProjectKanban = () => {
     };
 
     fetchTasks();
-  }, [filters, id, getTasks]);
+  }, [filters, getTasks, currentUser]);
 
   const handleFilterChange = (newFilters: TaskFilters) => {
     setFilters(newFilters);
     // Persist filters to localStorage
     localStorage.setItem(
-      `sprintspace-filters-${id}`,
+      `sprintspace-filters-my-tasks`,
       JSON.stringify(newFilters)
     );
   };
 
   const mutateTasks = () => {
-    // Refetch tasks with current filters
-    if (id) {
+    // Refetch tasks with current filters - only for current user
+    if (currentUser) {
+      // Add current user to filters to only fetch their tasks
+      const userFilters = {
+        ...filters,
+        assignedTo: [currentUser],
+      };
+
       getTasks({
-        project: id,
-        filters: JSON.stringify(filters),
+        project: "My Tasks",
+        filters: JSON.stringify(userFilters),
       })
         .then(setBoard)
         .catch((error) => {
@@ -107,18 +121,10 @@ const ProjectKanban = () => {
     }
   };
 
-  if (isProjectLoading) {
+  if (isTasksLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (!project) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="font-bold text-2xl">Project Not Found</p>
       </div>
     );
   }
@@ -137,17 +143,20 @@ const ProjectKanban = () => {
   }
 
   return (
-    <div
-      className="flex flex-1 flex-col pt-0 h-full"
-      style={{
-        backgroundColor: project?.custom_bg || "",
-        backgroundImage: project?.custom_bg
-          ? `url(${project.custom_bg})`
-          : "none",
-      }}
-    >
+    <div className="flex flex-1 flex-col pt-0 h-full">
       <ProjectNavbar
-        project={project}
+        project={
+          {
+            name: "My Tasks",
+            project_name: "My Tasks",
+            users: [user],
+            owner: currentUser,
+            creation: new Date().toISOString(),
+            modified: new Date().toISOString(),
+            modified_by: currentUser,
+            custom_bg: "",
+          } as unknown as Project
+        }
         onFilterChange={handleFilterChange}
         currentFilters={filters}
         viewMode={viewMode}
@@ -176,4 +185,4 @@ const ProjectKanban = () => {
   );
 };
 
-export default ProjectKanban;
+export default MyTasks;

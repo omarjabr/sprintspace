@@ -56,6 +56,7 @@ export interface User {
   user: string;
   email: string;
   image: string;
+  user_image: string;
   full_name: string;
   welcome_email_sent: number;
   view_attachments: number;

@@ -13,7 +13,10 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
+import { ErrorBoundary } from "./components/error-boundary";
 import { ModalProvider } from "./components/providers/modal-provider";
+import { Toaster } from "./components/ui/toast";
+import MyTasks from "./pages/MyTasks";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -25,6 +28,7 @@ const router = createBrowserRouter(
         <Route path=":id" element={<Projects />} />
         <Route path="projects" element={<BoardsPage />} />
         <Route path="projects/:id" element={<ProjectKanban />} />
+        <Route path="my-tasks" element={<MyTasks />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />
@@ -63,8 +67,14 @@ function App() {
       siteName={getSiteName()}
     >
       <UserProvider>
-        <RouterProvider router={router} fallbackElement={<FullPageLoader />} />
-        <ModalProvider />
+        <ErrorBoundary>
+          <RouterProvider
+            router={router}
+            fallbackElement={<FullPageLoader />}
+          />
+          <ModalProvider />
+          <Toaster position="top-right" />
+        </ErrorBoundary>
       </UserProvider>
     </FrappeProvider>
   );

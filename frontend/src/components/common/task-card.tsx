@@ -16,6 +16,7 @@ import {
   Paperclip,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface TaskCardProps {
   task: Task;
@@ -31,18 +32,19 @@ const TaskCard = ({ task, index, mutate }: TaskCardProps) => {
   );
 
   return (
-    <Draggable draggableId={task.name} index={index}>
-      {(provided) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          role="button"
-          onClick={() => {
-            cardModal.onOpen(task, mutate);
-          }}
-          className="px-2.5 py-1.5 bg-white rounded-md mx-2 border-2 border-transparent hover:border-blue-400 cursor-pointer shadow-sm flex flex-col gap-1"
-        >
+    <TooltipProvider>
+      <Draggable draggableId={task.name} index={index}>
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            role="button"
+            onClick={() => {
+              cardModal.onOpen(task, mutate);
+            }}
+            className="px-2.5 py-1.5 bg-white rounded-md mx-2 border-2 border-transparent hover:border-blue-400 cursor-pointer shadow-sm flex flex-col gap-1"
+          >
           <div className="flex items-center gap-2">
             {task?.type && (
               <div
@@ -67,7 +69,16 @@ const TaskCard = ({ task, index, mutate }: TaskCardProps) => {
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-x-3">
-              {task.is_document_followed && <Eye className="h-4 w-4" />}
+              {task.is_document_followed && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Eye className="h-4 w-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Watching this task</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               <div>
                 {task?.exp_end_date ? (
                   <div
@@ -124,8 +135,9 @@ const TaskCard = ({ task, index, mutate }: TaskCardProps) => {
             </div>
           </div>
         </div>
-      )}
-    </Draggable>
+        )}
+      </Draggable>
+    </TooltipProvider>
   );
 };
 

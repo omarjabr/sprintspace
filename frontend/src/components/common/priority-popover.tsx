@@ -33,8 +33,9 @@ const PriorityPopover = ({
             <p className="font-bold">Task Priority</p>
           </div>
           <div className="space-y-2">
-            {PRIORITIES.map((priority) => (
+            {PRIORITIES.map((priority, index) => (
               <Button
+                key={index}
                 type="button"
                 variant="ghost"
                 className={cn(

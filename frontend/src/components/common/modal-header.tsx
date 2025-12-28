@@ -2,6 +2,7 @@ import { Task } from "@/types";
 import { useFrappeUpdateDoc } from "frappe-react-sdk";
 import { Eye, Layout } from "lucide-react";
 import { ElementRef, useEffect, useRef, useState } from "react";
+import { DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 
 interface ModalHeaderProps {
@@ -98,24 +99,24 @@ const ModalHeader = ({ data, mutate }: ModalHeaderProps) => {
   }
 
   return (
-    <div
-      className="flex items-start gap-x-3 mb-4 w-full"
+    <DialogHeader
+      className="flex flex-row items-start gap-x-3 mb-4 w-full space-y-0"
       role="button"
       onClick={enableEditing}
     >
       <Layout className="w-5 h-5 mt-1 text-neutral-700" />
       <div className="w-full">
-        <h2 className="text-xl md:text-xl font-bold text-neutral-700">
+        <DialogTitle className="text-xl md:text-xl font-bold text-neutral-700">
           {title}
-        </h2>
+        </DialogTitle>
         <div className="flex items-center gap-x-2 text-muted-foreground">
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription className="text-sm text-muted-foreground">
             is list <span className="underline">{data.status}</span>
-          </p>
+          </DialogDescription>
           {data?.is_document_followed && <Eye className="w-4 h-4 mt-0.5" />}
         </div>
       </div>
-    </div>
+    </DialogHeader>
   );
 };
 
