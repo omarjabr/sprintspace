@@ -45,7 +45,6 @@ const TypePopover = ({ currentType, handleChangeType }: TypePopoverProps) => {
             {data &&
               data.map((type) => (
                 <Button
-                  key={type.name}
                   type="button"
                   variant="ghost"
                   className={cn(

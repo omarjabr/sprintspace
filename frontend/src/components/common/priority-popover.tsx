@@ -35,7 +35,6 @@ const PriorityPopover = ({
           <div className="space-y-2">
             {PRIORITIES.map((priority) => (
               <Button
-                key={priority}
                 type="button"
                 variant="ghost"
                 className={cn(

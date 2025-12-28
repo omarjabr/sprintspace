@@ -26,14 +26,9 @@ interface TaskCardProps {
 const TaskCard = ({ task, index, mutate }: TaskCardProps) => {
   const cardModal = useCardModal();
 
-  const commentsCount =
-    typeof task.comments_count === "number"
-      ? task.comments_count
-      : (task.comments || []).filter((c) => c.comment_type === "Comment").length;
-  const attachmentsCount =
-    typeof task.attachments_count === "number"
-      ? task.attachments_count
-      : (task.attachments || []).length;
+  const comments = task.comments.filter(
+    (comment) => comment.comment_type === "Comment"
+  );
 
   return (
     <Draggable draggableId={task.name} index={index}>
@@ -96,16 +91,16 @@ const TaskCard = ({ task, index, mutate }: TaskCardProps) => {
                   </div>
                 )}
               </div>
-              {commentsCount > 0 && (
+              {comments.length > 0 && (
                 <div className="flex items-center text-xs gap-1">
                   <MessageSquare size={12} />
-                  {commentsCount}
+                  {comments.length}
                 </div>
               )}
-              {attachmentsCount > 0 && (
+              {task.attachments.length > 0 && (
                 <div className="flex items-center text-xs gap-1">
                   <Paperclip size={12} />
-                  {attachmentsCount}
+                  {task.attachments.length}
                 </div>
               )}
             </div>

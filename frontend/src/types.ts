@@ -74,7 +74,6 @@ export type Task = {
   exp_start_date: string;
   exp_end_date: string;
   description: string;
-  custom_kanban_rank?: number;
   custom_kanban_index: number;
   completed_by: string;
   completed_on: string;
@@ -83,10 +82,8 @@ export type Task = {
   modified: string;
   project: string;
   is_document_followed: boolean;
-  comments?: Comment[];
-  attachments?: Attachment[];
-  comments_count?: number;
-  attachments_count?: number;
+  comments: Comment[];
+  attachments: Attachment[];
   users: TaskUser[];
 };
 
@@ -114,24 +111,4 @@ export type TaskUser = {
   full_name: string;
   email: string;
   user_image: string;
-};
-
-export type SprintSpaceLabel = {
-  name: string;
-  title: string;
-  color: string;
-  project_type?: string;
-};
-
-export type SprintSpaceChecklistItem = {
-  name: string;
-  title: string;
-  checked: 0 | 1;
-};
-
-export type SprintSpaceChecklist = {
-  name: string;
-  task: string;
-  title: string;
-  items: SprintSpaceChecklistItem[];
 };

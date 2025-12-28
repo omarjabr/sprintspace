@@ -2,8 +2,8 @@ import { TaskFilters } from "@/components/filter-dialog";
 import ListContainer from "@/components/list-container";
 import ProjectNavbar from "@/components/project-navbar";
 import { Project, Task } from "@/types";
-import { useFrappeEventListener, useFrappeGetDoc, useFrappePostCall } from "frappe-react-sdk";
-import { useEffect, useMemo, useState } from "react";
+import { useFrappeGetCall, useFrappeGetDoc } from "frappe-react-sdk";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 const ProjectKanban = () => {
@@ -13,7 +13,7 @@ const ProjectKanban = () => {
     priority: [],
     type: [],
     assignedTo: [],
-    dateRange: {}
+    dateRange: {},
   });
 
   if (!id) return null;
@@ -21,50 +21,24 @@ const ProjectKanban = () => {
   const { data: project, isLoading: isProjectLoading } =
     useFrappeGetDoc<Project>("Project", id);
 
-  const [board, setBoard] = useState<{
-    ok: boolean;
-    data?: {
-      lists: { id: string; icon: string; color: string; cards: Task[] }[];
-      total: number;
-    };
-    error?: { code: string; message: string };
-  } | null>(null);
-
-  const { call: fetchBoard, loading: isTasksLoading } = useFrappePostCall<{
+  const {
+    data: board,
+    isLoading: isTasksLoading,
+    mutate: mutateTasks,
+  } = useFrappeGetCall<{
     message: {
-      ok: boolean;
-      data?: {
-        lists: { id: string; icon: string; color: string; cards: Task[] }[];
-        total: number;
-      };
-      error?: { code: string; message: string };
-    };
-  }>("sprintspace.api.tasks.get_board");
-
-  const mutateTasks = () => {
-    fetchBoard({ project: id, filters: JSON.stringify(filters) }).then((resp) => {
-      setBoard(resp.message);
-    });
-  };
-
-  const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
-
-  useEffect(() => {
-    mutateTasks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, filterKey]);
-
-  useFrappeEventListener<{ project: string; type: string; task: string }>(
-    "sprintspace_board_update",
-    (event) => {
-      if (event?.project === id) {
-        mutateTasks();
-      }
-    }
-  );
+      id: string;
+      icon: string;
+      cards: Task[];
+    }[];
+  }>("sprintspace.api.tasks.get_tasks", {
+    project: id,
+    filters: JSON.stringify(filters),
+  });
 
   const handleFilterChange = (newFilters: TaskFilters) => {
     setFilters(newFilters);
+    mutateTasks();
   };
 
   if (isProjectLoading || isTasksLoading) {
@@ -91,16 +65,6 @@ const ProjectKanban = () => {
     );
   }
 
-  if (board.ok === false) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="font-bold text-2xl">
-          {board.error?.message || "Failed to load board"}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div
       className="flex flex-1 flex-col pt-0 h-full"
@@ -117,11 +81,7 @@ const ProjectKanban = () => {
         currentFilters={filters}
       />
       <div className="p-2 h-full">
-        <ListContainer
-          project={id}
-          data={board.data?.lists || []}
-          mutate={mutateTasks}
-        />
+        <ListContainer data={board.message} mutate={mutateTasks} />
       </div>
     </div>
   );
