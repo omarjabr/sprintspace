@@ -43,7 +43,7 @@ const AssignPopover = ({
             <div className="space-y-2">
               {users.cardUsers.map((user) => (
                 <Button
-                  key={user.name}
+                  key={user?.name}
                   type="button"
                   variant="ghost"
                   className="w-full text-start flex items-center justify-between gap-x-2 h-12 text-sm text-neutral-700"
@@ -52,21 +52,21 @@ const AssignPopover = ({
                   <div className="flex items-center gap-x-2">
                     <Avatar
                       className="w-8 h-8 -ml-1 text-xs font-bold"
-                      key={user.name}
-                      title={`${user.full_name} (${user.email})`}
+                      key={user?.name}
+                      title={`${user?.full_name} (${user?.email})`}
                     >
                       <AvatarImage
-                        src={user.user_image}
-                        alt={user.full_name}
+                        src={user?.user_image}
+                        alt={user?.full_name}
                         className="object-cover"
                       />
                       <AvatarFallback className="bg-blue-200 text-blue-800">
-                        {getInitials(user.full_name)}
+                        {getInitials(user?.full_name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid">
-                      <p>{user.full_name}</p>
-                      <p className="text-xs text-neutral-500">{user.email}</p>
+                      <p>{user?.full_name}</p>
+                      <p className="text-xs text-neutral-500">{user?.email}</p>
                     </div>
                   </div>
                   <X className="w-4 h-4" />
@@ -80,7 +80,7 @@ const AssignPopover = ({
             <div className="space-y-2">
               {users.users.map((user) => (
                 <Button
-                  key={user.name}
+                  key={user?.name}
                   type="button"
                   variant="ghost"
                   className="w-full text-start flex items-start justify-start gap-x-2 h-12 text-sm text-neutral-700"
@@ -88,21 +88,21 @@ const AssignPopover = ({
                 >
                   <Avatar
                     className="w-8 h-8 -ml-1 text-xs font-bold"
-                    key={user.name}
-                    title={`${user.full_name} (${user.email})`}
+                    key={user?.name}
+                    title={`${user?.full_name} (${user?.email})`}
                   >
                     <AvatarImage
-                      src={user.user_image}
-                      alt={user.full_name}
+                      src={user?.user_image}
+                      alt={user?.full_name}
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-blue-200 text-blue-800">
-                      {getInitials(user.full_name)}
+                      {getInitials(user?.full_name)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid">
-                    <p>{user.full_name}</p>
-                    <p className="text-xs text-neutral-500">{user.email}</p>
+                    <p>{user?.full_name}</p>
+                    <p className="text-xs text-neutral-500">{user?.email}</p>
                   </div>
                 </Button>
               ))}

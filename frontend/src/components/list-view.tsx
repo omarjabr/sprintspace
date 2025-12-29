@@ -22,13 +22,15 @@ interface GroupedTasks {
 
 const ListView = ({ tasks, mutate }: ListViewProps) => {
   const cardModal = useCardModal();
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    Open: true,
-    Working: true,
-    "Pending Review": true,
-    Overdue: true,
-    Completed: true,
-  });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
+    {
+      Open: true,
+      Working: true,
+      "Pending Review": true,
+      Overdue: true,
+      Completed: true,
+    }
+  );
 
   // Group tasks by status
   const groupedTasks = useMemo(() => {
@@ -114,9 +116,7 @@ const ListView = ({ tasks, mutate }: ListViewProps) => {
                     <ChevronRight className="h-5 w-5" />
                   )}
                   <span className="text-2xl">{getStatusIcon(status)}</span>
-                  <span className="font-semibold text-base">
-                    {status}
-                  </span>
+                  <span className="font-semibold text-base">{status}</span>
                   <span className="text-sm text-gray-600">
                     ({statusTasks.length})
                   </span>
@@ -176,7 +176,9 @@ const ListView = ({ tasks, mutate }: ListViewProps) => {
                             {formatDate(task.exp_end_date)}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400">No due date</span>
+                          <span className="text-xs text-gray-400">
+                            No due date
+                          </span>
                         )}
                       </div>
 
@@ -185,16 +187,16 @@ const ListView = ({ tasks, mutate }: ListViewProps) => {
                         <div className="flex items-center -space-x-2">
                           {task.users?.slice(0, 3).map((user, index) => (
                             <Avatar
-                              key={user.email}
+                              key={user?.email}
                               className="w-7 h-7 border-2 border-white"
-                              title={`${user.full_name} (${user.email})`}
+                              title={`${user?.full_name} (${user?.email})`}
                             >
                               <AvatarImage
-                                src={user.user_image}
-                                alt={user.full_name}
+                                src={user?.user_image}
+                                alt={user?.full_name}
                               />
                               <AvatarFallback className="bg-blue-200 text-blue-800 text-xs">
-                                {user.full_name
+                                {user?.full_name
                                   .split(" ")
                                   .map((n) => n[0])
                                   .join("")}
@@ -226,7 +228,9 @@ const ListView = ({ tasks, mutate }: ListViewProps) => {
                         {task.attachments && task.attachments.length > 0 && (
                           <div className="flex items-center gap-1 text-gray-600">
                             <Paperclip className="h-4 w-4" />
-                            <span className="text-xs">{task.attachments.length}</span>
+                            <span className="text-xs">
+                              {task.attachments.length}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -243,4 +247,3 @@ const ListView = ({ tasks, mutate }: ListViewProps) => {
 };
 
 export default ListView;
-
