@@ -2,7 +2,7 @@ import { formatHTML } from "@/lib/utils";
 import { Comment, Task } from "@/types";
 import { format } from "date-fns";
 import { Activity } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Button } from "../ui/button";
 
 interface ModalActivityProps {
@@ -39,11 +39,11 @@ const ModalActivity = ({ data }: ModalActivityProps) => {
             data.comments
               .slice(0, length)
               .map((comment, idx) => (
-                <>
+                <Fragment key={comment.name}>
                   {comment.comment_type === "Comment"
                     ? CommentComponent(comment)
                     : ActivityComponent(comment)}
-                </>
+                </Fragment>
               ))}
         </div>
         <div className="flex items-center gap-x-2 text-sm text-neutral-700">

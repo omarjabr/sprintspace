@@ -23,18 +23,20 @@ export function TaskModal() {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         aria-describedby="modal-description"
-        className="overflow-y-scroll max-h-[95vh]"
+        className="max-h-[calc(100dvh-128px)] h-fit"
       >
         <ModalHeader data={task} mutate={mutate} />
         <div className="grid grid-cols-1 md:grid-cols-4 md:gap-4">
           <div className="col-span-3">
-            <div className="w-full space-y-6">
+            <div className="w-full space-y-6 ">
               <ModalStatusBar data={task} mutate={mutate} />
-              <ModalDescription data={task} mutate={mutate} />
-              {task.attachments && task.attachments.length > 0 && (
-                <ModalAttachments data={task} mutate={mutate} />
-              )}
-              <ModalActivity data={task} />
+              <div className="w-full space-y-6 overflow-y-auto overflow-x-hidden max-h-[calc(85dvh-256px)]">
+                <ModalDescription data={task} mutate={mutate} />
+                {task.attachments && task.attachments.length > 0 && (
+                  <ModalAttachments data={task} mutate={mutate} />
+                )}
+                <ModalActivity data={task} />
+              </div>
             </div>
           </div>
           <div>

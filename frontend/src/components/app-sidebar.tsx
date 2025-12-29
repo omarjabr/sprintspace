@@ -1,4 +1,4 @@
-import { Layout } from "lucide-react";
+import { Layout, ListTodo } from "lucide-react";
 import * as React from "react";
 
 import { CompanySwitcher } from "@/components/company-switcher";
@@ -21,6 +21,12 @@ const data = {
       title: "Boards",
       url: "/",
       icon: Layout,
+      isActive: true,
+    },
+    {
+      title: "My Tasks",
+      url: "/my-tasks",
+      icon: ListTodo,
       isActive: true,
     },
   ],

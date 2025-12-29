@@ -3,6 +3,7 @@ import { DragDropContext } from "@hello-pangea/dnd";
 import { useFrappePutCall } from "frappe-react-sdk";
 import { useEffect, useState } from "react";
 import ListItem from "./list-item";
+import { toast } from "./ui/toast";
 
 interface ListContainerProps {
   data: {
@@ -55,6 +56,9 @@ function ListContainer({ data, mutate }: ListContainerProps) {
       return;
     }
 
+    // Save previous state for rollback
+    const previousOrderedData = JSON.parse(JSON.stringify(orderedData));
+    
     let newOrderedData = [...orderedData];
     const updates: any[] = [];
 
@@ -110,13 +114,23 @@ function ListContainer({ data, mutate }: ListContainerProps) {
         });
       }
 
+      // Optimistically update UI immediately
+      setOrderedData(newOrderedData);
+
+      // Update backend
       await updateCardOrder({ tasks: updates });
 
-      setOrderedData(newOrderedData);
+      // Refetch to ensure consistency
       mutate();
+      
+      toast.success("Task updated successfully");
     } catch (error) {
       console.error("Error updating task positions:", error);
-      // Optionally show error notification
+      
+      // Rollback to previous state on error
+      setOrderedData(previousOrderedData);
+      
+      toast.error("Failed to update task. Changes have been reverted.");
     }
   };
 
