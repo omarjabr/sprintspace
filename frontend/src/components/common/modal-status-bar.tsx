@@ -52,13 +52,13 @@ const ModalStatusBar = ({ data, mutate }: ModalStatusBarProps) => {
   const handleAssignUser = (user: TaskUser) => {
     setUsers({
       cardUsers: [...users.cardUsers, user],
-      users: users.users.filter((u) => u.name !== user.name),
+      users: users.users.filter((u) => u.name !== user?.name),
     });
 
     assignUser({
       doctype: "Task",
       name: data.name,
-      assign_to: [user.name],
+      assign_to: [user?.name],
     }).then(() => {
       mutate();
     });
@@ -66,13 +66,13 @@ const ModalStatusBar = ({ data, mutate }: ModalStatusBarProps) => {
 
   const handleUnassignUser = (user: TaskUser) => {
     setUsers({
-      cardUsers: users.cardUsers.filter((u) => u.name !== user.name),
+      cardUsers: users.cardUsers.filter((u) => u.name !== user?.name),
       users: [...users.users, user],
     });
     unassignUser({
       doctype: "Task",
       name: data.name,
-      assign_to: user.name,
+      assign_to: user?.name,
     }).then(() => {
       mutate();
     });
@@ -121,7 +121,7 @@ const ModalStatusBar = ({ data, mutate }: ModalStatusBarProps) => {
       // remove data.users from usersList
       const nonAssignedUsers = usersList.filter(
         (user) =>
-          !data.users.find((assignedUser) => assignedUser.name === user.name)
+          !data.users.find((assignedUser) => assignedUser.name === user?.name)
       );
 
       setUsers({ cardUsers: data.users, users: nonAssignedUsers });
@@ -151,16 +151,16 @@ const ModalStatusBar = ({ data, mutate }: ModalStatusBarProps) => {
                 users.cardUsers.map((user) => (
                   <Avatar
                     className="w-8 h-8 -ml-1 text-xs font-bold"
-                    key={user.name}
-                    title={`${user.full_name} (${user.email})`}
+                    key={user?.name}
+                    title={`${user?.full_name} (${user?.email})`}
                   >
                     <AvatarImage
-                      src={user.user_image}
-                      alt={user.full_name}
+                      src={user?.user_image}
+                      alt={user?.full_name}
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-blue-200 text-blue-800">
-                      {getInitials(user.full_name)}
+                      {getInitials(user?.full_name)}
                     </AvatarFallback>
                   </Avatar>
                 ))}

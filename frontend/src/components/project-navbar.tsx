@@ -118,10 +118,10 @@ const ProjectNavbar = ({
 
             <div className="flex relative flex-row justify-center top-[2px] align-baseline max-h-[32px] mr-1 pl-[2px] overflow-visible gap-x-2">
               {project.users.map((user) => (
-                <Tooltip key={user.email}>
+                <Tooltip key={user?.email}>
                   <TooltipTrigger asChild>
                     <Avatar
-                      key={user.email}
+                      key={user?.email}
                       className="w-7 h-7 text-xs font-bold"
                     >
                       <AvatarImage
@@ -130,13 +130,13 @@ const ProjectNavbar = ({
                         className="object-cover"
                       />
                       <AvatarFallback className="bg-blue-200 text-blue-800">
-                        {getInitials(user.full_name)}
+                        {getInitials(user?.full_name)}
                       </AvatarFallback>
                     </Avatar>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>
-                      {user.full_name} ({user.email})
+                      {user?.full_name} ({user?.email})
                     </p>
                   </TooltipContent>
                 </Tooltip>
