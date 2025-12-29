@@ -52,7 +52,6 @@ def get_task_data(project: str, page: int = 1, page_size: int = 9999, filters: D
                     task_filters["exp_end_date"] = ["<=", date_range["end"]]
 
         # Get tasks with main data
-        print(task_filters)
         tasks = frappe.get_all(
             "Task",
             filters=task_filters,

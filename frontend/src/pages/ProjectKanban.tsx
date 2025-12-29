@@ -124,11 +124,12 @@ const ProjectKanban = () => {
   }
 
   // Flatten all tasks for calendar view
-  const allTasks = board?.message
-    ? board.message.flatMap((column) => column.cards)
-    : [];
+  const allTasks =
+    board?.message && Array.isArray(board.message)
+      ? board.message.flatMap((column) => column.cards)
+      : [];
 
-  if (!board || !board.message) {
+  if (!board || !board.message || !Array.isArray(board.message)) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <p className="font-bold text-2xl">No Tasks Found</p>
